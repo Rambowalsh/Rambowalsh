@@ -11,17 +11,19 @@ class ProcessData:
         return heatLoss
 
     def calculatePowerHeatLoss(self, heatLoss, heatingDegrees):
-        powerHeatLoss = heatLoss / heatingDegrees 
+        powerHeatLoss = float(heatLoss) / float(heatingDegrees) 
         return powerHeatLoss
 
-    def findDegreeDays(self,filePath):
+    def findDegreeDays(self,designRegion):
         houseDict = {}
         obj = GetData()
-        with open(filePath) as data_file:    
-            jsonObject = json.load(data_file)
-        for tag in jsonObject:
-            designRegion = tag["designRegion"]
-            degreeDays = obj.fetchData(str(designRegion))
-            houseDict['designRegion'] = tag["degreeDays"]
+        resp = obj.fetchData(str(designRegion))
+        if resp.status_code == 200:
+            data = resp.text
+            parse_json = json.loads(data)
+            degreeDays = parse_json['location']['degreeDays']
+            houseDict['designRegion'] = degreeDays
+        else:
+            houseDict['designRegion'] = None
         return houseDict
 
